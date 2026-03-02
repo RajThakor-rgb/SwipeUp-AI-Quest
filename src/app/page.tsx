@@ -37,7 +37,7 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
             <img 
               src="/SwipeUp-AI-Quest/swipeup-logo.jpeg" 
               alt="SwipeUp AI Society" 
-              className="h-20 w-auto rounded-xl shadow-lg shadow-teal-500/20"
+              className="h-28 w-auto object-contain rounded-xl shadow-lg shadow-teal-500/20"
             />
           </div>
 
