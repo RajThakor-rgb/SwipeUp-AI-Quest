@@ -35,7 +35,7 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <img 
-              src="/swipeup-logo.jpeg" 
+              src="/SwipeUp-AI-Quest/swipeup-logo.jpeg" 
               alt="SwipeUp AI Society" 
               className="h-20 w-auto rounded-xl shadow-lg shadow-teal-500/20"
             />
