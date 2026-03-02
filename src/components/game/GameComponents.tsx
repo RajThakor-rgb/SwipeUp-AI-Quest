@@ -583,7 +583,7 @@ export function Certificate({
             <img 
               src="/SwipeUp-AI-Quest/swipeup-logo.jpeg" 
               alt="SwipeUp AI Society" 
-              className="h-16 w-auto rounded-lg"
+              className="h-24 w-auto object-contain rounded-lg"
             />
           </div>
 
@@ -661,7 +661,7 @@ export function GameHeader({
           <img 
             src="/SwipeUp-AI-Quest/swipeup-logo.jpeg"
             alt="SwipeUp AI Society" 
-            className="h-10 w-auto rounded"
+            className="h-10 w-auto object-contain rounded"
           />
           <div>
             <h1 className="text-lg font-bold text-white">AI Quest</h1>
