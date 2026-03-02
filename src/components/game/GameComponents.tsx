@@ -581,7 +581,7 @@ export function Certificate({
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <img 
-              src="swipeup-logo.jpeg" 
+              src="/SwipeUp-AI-Quest/swipeup-logo.jpeg" 
               alt="SwipeUp AI Society" 
               className="h-16 w-auto rounded-lg"
             />
@@ -659,7 +659,7 @@ export function GameHeader({
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img 
-            src="swipeup-logo.jpeg" 
+            src="/SwipeUp-AI-Quest/swipeup-logo.jpeg"
             alt="SwipeUp AI Society" 
             className="h-10 w-auto rounded"
           />
