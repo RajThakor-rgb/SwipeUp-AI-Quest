@@ -109,6 +109,24 @@ export function useGameState() {
       };
       saveProgress(newProgress);
 
+        const previousSection = useCallback(() => {
+    setState(prev => {
+      if (!prev.activeMission) return prev;
+      
+      const prevSection = Math.max(0, prev.progress.currentSection - 1);
+
+      const newProgress = {
+        ...prev.progress,
+        currentSection: prevSection,
+      };
+      saveProgress(newProgress);
+
+      return {
+        ...prev,
+        progress: newProgress,
+      };
+    });
+  }, [saveProgress]);
       return {
         ...prev,
         progress: newProgress,
@@ -253,6 +271,7 @@ export function useGameState() {
     startGame,
     selectMission,
     completeSection,
+    previousSection,
     answerQuiz,
     nextQuestion,
     returnToMap,
