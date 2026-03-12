@@ -46,16 +46,16 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
             <p className="text-teal-400 font-medium mb-2 text-sm sm:text-base">
               AI Literacy for Business Students
             </p>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
               Master AI fundamentals, tools, ethics, and practical business applications 
               through interactive missions designed for future business leaders.
             </p>
           </div>
 
           <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
-            <div className="text-center p-2 sm:p-3 bg-slate-800/50 rounded-lg">
+            <div className="text-center p-2 sm:p-3 bg-slate-800/60 rounded-lg">
               <p className="text-xl sm:text-2xl font-bold text-teal-400">6</p>
-              <p className="text-xs text-slate-400">Missions</p>
+              <p className="text-xs text-slate-300">Missions</p>
             </div>
             <div className="text-center p-2 sm:p-3 bg-slate-800/50 rounded-lg">
               <p className="text-xl sm:text-2xl font-bold text-amber-400">1200+</p>
@@ -69,7 +69,7 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
 
           <div className="space-y-3 sm:space-y-4">
             <div>
-              <label className="block text-xs sm:text-sm text-slate-400 mb-2">
+              <label className="block text-xs sm:text-sm text-slate-300 mb-2">
                 Enter your name to begin
               </label>
               <Input
@@ -92,7 +92,7 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
           </div>
 
           <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-700">
-            <p className="text-xs text-slate-500 text-center mb-3 sm:mb-4">What you'll learn:</p>
+            <p className="text-xs text-slate-300 text-center mb-3 sm:mb-4">What you'll learn:</p>
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
               {[
                 '🧠 AI Fundamentals',
@@ -102,7 +102,7 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
                 '📋 Business Applications',
                 '🏆 Final Challenge',
               ].map((item, i) => (
-                <div key={i} className="text-slate-400 text-center py-1">
+                <div key={i} className="text-slate-300 text-center py-1">
                   {item}
                 </div>
               ))}
@@ -147,7 +147,7 @@ function MissionSelectScreen({
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
             Welcome back, {playerName}!
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base">
+          <p className="text-slate-300 text-sm sm:text-base">
             {isComplete 
               ? '🎉 Congratulations! You have completed all missions!'
               : 'Select a mission to continue your AI learning journey.'
