@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { missions } from '@/data/missions';
 import { 
@@ -353,6 +353,21 @@ export default function Home() {
 
   const { progress, currentView, activeMission, activeQuizQuestion, quizAnswers, showFeedback } = state;
 
+    // Scroll to top whenever view changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentView]);
+
+  // Scroll to top when section changes within a mission
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [progress.currentSection]);
+
+  // Scroll to top when quiz question changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [activeQuizQuestion]);
+  
   // Handle mission selection
   const handleSelectMission = (missionId: number) => {
     const mission = missions.find(m => m.id === missionId);
