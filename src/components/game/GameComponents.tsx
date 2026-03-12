@@ -85,13 +85,11 @@ export function MissionCard({
       )}
       onClick={isUnlocked ? onClick : undefined}
     >
-      {/* Background gradient */}
       <div className={cn(
         'absolute inset-0 opacity-5',
         isUnlocked ? 'bg-gradient-to-br from-teal-500 to-cyan-500' : 'bg-slate-700'
       )} />
       
-      {/* Status indicator */}
       {isCompleted && (
         <div className="absolute top-3 right-3 z-10">
           <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-teal-500 flex items-center justify-center shadow-lg">
@@ -100,7 +98,6 @@ export function MissionCard({
         </div>
       )}
       
-      {/* Lock indicator */}
       {!isUnlocked && (
         <div className="absolute top-3 right-3 z-10">
           <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-slate-700 flex items-center justify-center">
@@ -154,7 +151,7 @@ export function MissionCard({
   );
 }
 
-// Mind Map Component
+// Mind Map View Component - Visual Cheat Sheet
 function MindMapView({ 
   section 
 }: { 
@@ -166,8 +163,8 @@ function MindMapView({
     example?: string;
   };
 }) {
-  const extractConcepts = (content: string, keyPoints?: string[]) => {
-    const concepts: { title: string; children: string[] }[] = [];
+  const extractMindMapContent = (content: string, keyPoints?: string[]) => {
+    const branches: { title: string; items: string[] }[] = [];
     
     const paragraphs = content.split('\n\n');
     
@@ -175,121 +172,130 @@ function MindMapView({
       const headerMatch = para.match(/\*\*(.+?):\*\*/);
       if (headerMatch) {
         const title = headerMatch[1];
-        const children: string[] = [];
+        const items: string[] = [];
         
         const lines = para.split('\n');
         lines.forEach(line => {
           const bulletMatch = line.match(/^[-*] (.+)/);
           if (bulletMatch) {
-            children.push(bulletMatch[1].replace(/\*\*(.+?)\*\*/g, '$1'));
+            items.push(bulletMatch[1].replace(/\*\*(.+?)\*\*/g, '$1'));
           }
         });
         
-        if (children.length > 0) {
-          concepts.push({ title, children });
+        if (items.length > 0) {
+          branches.push({ title, items });
         }
       }
       
-      if (para.includes('\n- ') || para.includes('\n* ')) {
+      if ((para.includes('\n- ') || para.includes('\n* ')) && !para.includes('**')) {
         const lines = para.split('\n');
-        const items = lines.filter(l => l.startsWith('- ') || l.startsWith('* '));
-        if (items.length > 0 && !para.includes('**')) {
-          items.forEach(item => {
-            const text = item.replace(/^[-*] /, '').replace(/\*\*(.+?)\*\*/g, '$1');
-            if (text.length > 0 && text.length < 100) {
-              const existingKeyPoints = concepts.find(c => c.title === 'Key Points');
-              if (existingKeyPoints) {
-                existingKeyPoints.children.push(text);
-              } else {
-                concepts.push({ title: 'Key Points', children: [text] });
-              }
-            }
-          });
+        const items = lines
+          .filter(l => l.startsWith('- ') || l.startsWith('* '))
+          .map(l => l.replace(/^[-*] /, '').replace(/\*\*(.+?)\*\*/g, '$1'));
+        
+        if (items.length > 0) {
+          branches.push({ title: 'Key Points', items });
         }
       }
     });
     
     if (keyPoints && keyPoints.length > 0) {
-      concepts.push({ 
-        title: 'Key Takeaways', 
-        children: keyPoints 
-      });
+      branches.push({ title: 'Key Takeaways', items: keyPoints });
     }
     
-    return concepts;
+    return branches;
   };
 
-  const concepts = extractConcepts(section.content, section.keyPoints);
-  const colors = [
-    'from-teal-500 to-cyan-500',
-    'from-purple-500 to-pink-500',
-    'from-amber-500 to-orange-500',
-    'from-green-500 to-emerald-500',
-    'from-blue-500 to-indigo-500',
+  const branches = extractMindMapContent(section.content, section.keyPoints);
+  
+  const branchColors = [
+    { primary: '#14b8a6', secondary: '#0d9488', light: 'rgba(20, 184, 166, 0.15)' },
+    { primary: '#8b5cf6', secondary: '#7c3aed', light: 'rgba(139, 92, 246, 0.15)' },
+    { primary: '#f59e0b', secondary: '#d97706', light: 'rgba(245, 158, 11, 0.15)' },
+    { primary: '#10b981', secondary: '#059669', light: 'rgba(16, 185, 129, 0.15)' },
+    { primary: '#3b82f6', secondary: '#2563eb', light: 'rgba(59, 130, 246, 0.15)' },
+    { primary: '#ec4899', secondary: '#db2777', light: 'rgba(236, 72, 153, 0.15)' },
   ];
 
   return (
-    <div className="w-full overflow-x-auto pb-4">
-      <div className="min-w-[600px] flex flex-col items-center">
-        <div className="relative">
-          <div className="px-6 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl shadow-lg shadow-teal-500/30 text-center">
-            <h3 className="text-lg font-bold text-white max-w-[250px]">{section.title}</h3>
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-[700px] py-6">
+        {/* Central Topic */}
+        <div className="flex justify-center mb-8">
+          <div 
+            className="relative px-8 py-4 rounded-2xl shadow-xl text-center"
+            style={{ 
+              background: 'linear-gradient(135deg, #14b8a6, #0891b2)',
+              boxShadow: '0 10px 40px rgba(20, 184, 166, 0.3)'
+            }}
+          >
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center text-xs">
+              💡
+            </div>
+            <h3 className="text-lg font-bold text-white max-w-[200px]">{section.title}</h3>
           </div>
-          
-          <svg className="absolute top-full left-1/2 w-full h-8 -translate-x-1/2" style={{ minWidth: '500px' }}>
-            {concepts.map((_, i) => {
-              const totalWidth = concepts.length * 150;
-              const startX = totalWidth / 2;
-              const endX = i * 150 + 75;
-              return (
-                <line
-                  key={i}
-                  x1={startX}
-                  y1="0"
-                  x2={endX}
-                  y2="32"
-                  stroke="rgb(20, 184, 166)"
-                  strokeWidth="2"
-                  strokeDasharray="4"
-                />
-              );
-            })}
-          </svg>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 mt-10 pt-4">
-          {concepts.map((concept, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <div className={cn(
-                'px-4 py-2 rounded-lg shadow-lg text-center mb-3',
-                `bg-gradient-to-r ${colors[i % colors.length]}`
-              )}>
-                <h4 className="text-sm font-bold text-white whitespace-nowrap">{concept.title}</h4>
-              </div>
-              
-              <div className="flex flex-col gap-2">
-                {concept.children.slice(0, 4).map((child, j) => (
+        {/* Mind Map Branches */}
+        <div className="flex flex-wrap justify-center gap-6">
+          {branches.map((branch, i) => {
+            const color = branchColors[i % branchColors.length];
+            return (
+              <div key={i} className="flex flex-col items-center" style={{ maxWidth: '280px' }}>
+                <div 
+                  className="px-5 py-2.5 rounded-xl shadow-lg mb-4 text-center"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${color.primary}, ${color.secondary})`,
+                    boxShadow: `0 4px 20px ${color.light}`
+                  }}
+                >
+                  <h4 className="text-sm font-bold text-white whitespace-nowrap">{branch.title}</h4>
+                </div>
+                
+                <div className="flex flex-col items-center mb-3">
                   <div 
-                    key={j} 
-                    className="px-3 py-1.5 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 max-w-[200px]"
-                  >
-                    {child.length > 60 ? child.substring(0, 60) + '...' : child}
-                  </div>
-                ))}
-                {concept.children.length > 4 && (
-                  <div className="px-3 py-1 text-xs text-slate-400 text-center">
-                    +{concept.children.length - 4} more
-                  </div>
-                )}
+                    className="w-0.5 h-4"
+                    style={{ backgroundColor: color.primary }}
+                  />
+                </div>
+                
+                <div className="flex flex-col gap-2 w-full">
+                  {branch.items.map((item, j) => (
+                    <div 
+                      key={j}
+                      className="relative px-4 py-2 rounded-lg text-sm text-slate-200 border-l-4"
+                      style={{ 
+                        backgroundColor: color.light,
+                        borderLeftColor: color.primary
+                      }}
+                    >
+                      <span className="flex items-start gap-2">
+                        <span 
+                          className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
+                          style={{ backgroundColor: color.primary }}
+                        />
+                        <span>{item}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {section.example && (
-          <div className="mt-8 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg max-w-md">
-            <h4 className="text-sm font-semibold text-amber-400 mb-2">💡 Example</h4>
-            <p className="text-xs text-slate-300">{section.example}</p>
+          <div className="mt-8 flex justify-center">
+            <div 
+              className="p-4 rounded-xl max-w-md text-center"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1))',
+                border: '1px solid rgba(245, 158, 11, 0.3)'
+              }}
+            >
+              <h4 className="text-sm font-semibold text-amber-400 mb-2">💡 Practical Example</h4>
+              <p className="text-sm text-slate-200">{section.example}</p>
+            </div>
           </div>
         )}
       </div>
@@ -424,7 +430,6 @@ export function ContentSection({
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Progress indicator */}
       <div className="mb-4 sm:mb-6 px-1">
         <GameProgressBar
           value={currentSection + 1}
@@ -433,7 +438,6 @@ export function ContentSection({
         />
       </div>
 
-      {/* View Mode Toggle */}
       <div className="flex justify-center mb-4 px-4">
         <div className="inline-flex rounded-lg bg-slate-800 p-1">
           <button
@@ -461,7 +465,6 @@ export function ContentSection({
         </div>
       </div>
 
-      {/* Content card */}
       <Card className="bg-slate-900/80 border-slate-700 mx-2 sm:mx-0">
         <CardHeader className="pb-2 sm:pb-4">
           <CardTitle className="text-xl sm:text-2xl text-white">{section.title}</CardTitle>
@@ -500,9 +503,7 @@ export function ContentSection({
         </CardContent>
       </Card>
 
-      {/* Navigation buttons */}
       <div className="mt-4 sm:mt-6 flex justify-between gap-3 px-4">
-        {/* Back button */}
         {onBack && currentSection > 0 ? (
           <Button
             onClick={onBack}
@@ -517,7 +518,6 @@ export function ContentSection({
           <div />
         )}
         
-        {/* Continue button */}
         <Button
           onClick={onContinue}
           size="lg"
@@ -553,7 +553,6 @@ export function Quiz({
 }) {
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4">
-      {/* Progress */}
       <div className="mb-4 sm:mb-6">
         <div className="flex justify-between text-xs sm:text-sm text-slate-400 mb-2">
           <span>Question {questionNumber + 1} of {totalQuestions}</span>
@@ -565,7 +564,6 @@ export function Quiz({
         />
       </div>
 
-      {/* Question */}
       <Card className="bg-slate-900/80 border-slate-700 mb-4 sm:mb-6">
         <CardHeader className="pb-2">
           <Badge className={cn(
@@ -578,7 +576,6 @@ export function Quiz({
         </CardHeader>
       </Card>
 
-      {/* Options */}
       <div className="space-y-2 sm:space-y-3">
         {question.options?.map((option, index) => {
           const isSelected = selectedAnswer === index;
@@ -623,7 +620,6 @@ export function Quiz({
         })}
       </div>
 
-      {/* Feedback */}
       {showFeedback && (
         <Card className={cn(
           'mt-4 sm:mt-6 mx-1',
@@ -643,7 +639,6 @@ export function Quiz({
         </Card>
       )}
 
-      {/* Next button */}
       <div className="mt-4 sm:mt-6 flex justify-center px-2">
         <Button
           onClick={onNext}
@@ -682,7 +677,6 @@ export function Results({
 }) {
   return (
     <div className="max-w-2xl mx-auto text-center px-4">
-      {/* Result icon */}
       <div className={cn(
         'w-16 h-16 sm:w-24 sm:h-24 rounded-full mx-auto flex items-center justify-center text-4xl sm:text-5xl mb-4 sm:mb-6',
         passed ? 'bg-green-500/20' : 'bg-red-500/20'
@@ -690,7 +684,6 @@ export function Results({
         {passed ? '🎉' : '📚'}
       </div>
 
-      {/* Title */}
       <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
         {passed ? 'Mission Complete!' : 'Keep Learning!'}
       </h2>
@@ -701,7 +694,6 @@ export function Results({
         }
       </p>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
         <Card className="bg-slate-900/80 border-slate-700">
           <CardContent className="py-3 sm:py-6 px-2">
@@ -723,7 +715,6 @@ export function Results({
         </Card>
       </div>
 
-      {/* Actions */}
       <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-4">
         <Button
           onClick={onReturnToMap}
@@ -764,12 +755,10 @@ export function Certificate({
   return (
     <div className="max-w-2xl mx-auto px-4">
       <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-teal-500 overflow-hidden">
-        {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-24 h-24 sm:w-32 sm:h-32 bg-teal-500/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-cyan-500/10 rounded-full translate-x-1/2 translate-y-1/2" />
         
         <CardContent className="p-4 sm:p-8 relative">
-          {/* Logo */}
           <div className="flex justify-center mb-4 sm:mb-6">
             <img 
               src="/SwipeUp-AI-Quest/swipeup-logo.jpeg" 
@@ -778,7 +767,6 @@ export function Certificate({
             />
           </div>
 
-          {/* Title */}
           <div className="text-center mb-4 sm:mb-8">
             <p className="text-teal-400 uppercase tracking-widest text-xs sm:text-sm mb-2">
               Certificate of Completion
@@ -791,7 +779,6 @@ export function Certificate({
             </p>
           </div>
 
-          {/* Recipient */}
           <div className="text-center mb-4 sm:mb-8">
             <p className="text-slate-400 text-xs sm:text-sm">This is to certify that</p>
             <p className="text-xl sm:text-2xl font-bold text-teal-400 my-1 sm:my-2">{playerName}</p>
@@ -802,7 +789,6 @@ export function Certificate({
             </p>
           </div>
 
-          {/* Stats */}
           <div className="flex justify-center gap-6 sm:gap-8 mb-4 sm:mb-8">
             <div className="text-center">
               <p className="text-2xl sm:text-3xl font-bold text-white">{xp.toLocaleString()}</p>
@@ -814,13 +800,11 @@ export function Certificate({
             </div>
           </div>
 
-          {/* Date */}
           <div className="text-center border-t border-slate-700 pt-4 sm:pt-6">
             <p className="text-slate-400 text-xs sm:text-sm">Completed on</p>
             <p className="text-white font-semibold text-sm sm:text-base">{date}</p>
           </div>
 
-          {/* Badge */}
           <div className="flex justify-center mt-4 sm:mt-6">
             <div className="flex items-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm sm:text-base">
               <span>🏆</span>
@@ -838,17 +822,30 @@ export function GameHeader({
   playerName, 
   xp, 
   missionsCompleted,
-  onReset,
+  showBackButton,
+  onBackToMissions,
 }: { 
   playerName: string;
   xp: number;
   missionsCompleted: number;
-  onReset?: () => void;
+  showBackButton?: boolean;
+  onBackToMissions?: () => void;
 }) {
   return (
     <header className="bg-slate-900/90 border-b border-slate-700 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {showBackButton && onBackToMissions && (
+            <Button
+              onClick={onBackToMissions}
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white hover:bg-slate-800 mr-1"
+            >
+              <span className="mr-1">←</span>
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+          )}
           <img 
             src="/SwipeUp-AI-Quest/swipeup-logo.jpeg" 
             alt="SwipeUp AI Society" 
@@ -872,17 +869,6 @@ export function GameHeader({
             <div className="hidden md:block text-sm text-slate-300 max-w-[120px] truncate">
               <span className="text-teal-400">{playerName}</span>
             </div>
-          )}
-
-          {onReset && (
-            <Button
-              onClick={onReset}
-              variant="ghost"
-              size="sm"
-              className="text-slate-400 hover:text-white text-xs sm:text-sm"
-            >
-              Reset
-            </Button>
           )}
         </div>
       </div>
