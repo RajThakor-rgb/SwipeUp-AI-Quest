@@ -44,12 +44,12 @@ export function GameProgressBar({
   return (
     <div className="w-full space-y-2">
       {label && (
-        <div className="flex justify-between text-sm text-slate-400">
+        <div className="flex justify-between text-sm text-slate-200 font-medium">
           <span>{label}</span>
-          {showPercentage && <span>{percentage}%</span>}
+          {showPercentage && <span className="text-teal-400">{percentage}%</span>}
         </div>
       )}
-      <Progress value={percentage} className="h-3 bg-slate-800" />
+      <Progress value={percentage} className="h-3 bg-slate-700" />
     </div>
   );
 }
@@ -113,7 +113,7 @@ export function MissionCard({
             <CardTitle className="text-base sm:text-lg text-white leading-tight">
               Mission {mission.id}: {mission.title}
             </CardTitle>
-            <CardDescription className="text-slate-400 text-xs sm:text-sm truncate">
+            <CardDescription className="text-slate-300 text-xs sm:text-sm truncate">
               {mission.subtitle}
             </CardDescription>
           </div>
@@ -121,7 +121,7 @@ export function MissionCard({
       </CardHeader>
 
       <CardContent className="space-y-3 sm:space-y-4">
-        <p className="text-xs sm:text-sm text-slate-300 line-clamp-2">{mission.description}</p>
+        <p className="text-xs sm:text-sm text-slate-200 line-clamp-2">{mission.description}</p>
         
         <div className="flex flex-wrap gap-1.5 sm:gap-2">
           <Badge className={cn('text-white text-xs', `bg-gradient-to-r ${difficultyColors[mission.difficulty]}`)}>
@@ -519,11 +519,11 @@ export function ContentSection({
               {renderContent(section.content)}
               
               {section.keyPoints && section.keyPoints.length > 0 && (
-                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-teal-500/10 rounded-lg border border-teal-500/30">
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-teal-500/15 rounded-lg border border-teal-500/40">
                   <h4 className="text-base sm:text-lg font-semibold text-teal-400 mb-2 sm:mb-3">Key Takeaways</h4>
                   <ul className="space-y-1.5 sm:space-y-2">
                     {section.keyPoints.map((point, i) => (
-                      <li key={i} className="flex gap-2 text-sm sm:text-base text-slate-300">
+                      <li key={i} className="flex gap-2 text-sm sm:text-base text-slate-200">
                         <span className="text-teal-400 flex-shrink-0">✓</span>
                         <span>{point}</span>
                       </li>
@@ -533,9 +533,9 @@ export function ContentSection({
               )}
 
               {section.example && (
-                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-amber-500/15 rounded-lg border border-amber-500/40">
                   <h4 className="text-base sm:text-lg font-semibold text-amber-400 mb-2">Example</h4>
-                  <p className="text-sm sm:text-base text-slate-300 italic">{section.example}</p>
+                  <p className="text-sm sm:text-base text-slate-200 italic">{section.example}</p>
                 </div>
               )}
             </>
@@ -598,14 +598,11 @@ export function Quiz({
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4">
       <div className="mb-4 sm:mb-6">
-        <div className="flex justify-between text-xs sm:text-sm text-slate-400 mb-2">
+        <div className="flex justify-between text-xs sm:text-sm text-slate-300 mb-2">
           <span>Question {questionNumber + 1} of {totalQuestions}</span>
-          <span>+{question.xpValue} XP</span>
+          <span className="text-teal-400">+{question.xpValue} XP</span>
         </div>
-        <Progress 
-          value={((questionNumber + 1) / totalQuestions) * 100} 
-          className="h-2 bg-slate-800" 
-        />
+        <Progress value={((questionNumber + 1) / totalQuestions) * 100} className="h-2 bg-slate-700" />
       </div>
 
       <Card className="bg-slate-900/80 border-slate-700 mb-4 sm:mb-6">
@@ -625,16 +622,16 @@ export function Quiz({
           const isSelected = selectedAnswer === index;
           const isCorrectAnswer = question.correctAnswer === index;
           
-          let optionStyle = 'bg-slate-800 border-slate-600 hover:border-teal-500';
+          let optionStyle = 'bg-slate-800 border-slate-500 hover:border-teal-500';
           
           if (showFeedback) {
             if (isCorrectAnswer) {
-              optionStyle = 'bg-green-900/50 border-green-500';
+              optionStyle = 'bg-green-900/40 border-green-400';
             } else if (isSelected && !isCorrect) {
-              optionStyle = 'bg-red-900/50 border-red-500';
+              optionStyle = 'bg-red-900/40 border-red-400';
             }
           } else if (isSelected) {
-            optionStyle = 'bg-teal-900/50 border-teal-500';
+            optionStyle = 'bg-teal-900/40 border-teal-400';
           }
 
           return (
