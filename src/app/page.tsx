@@ -24,7 +24,6 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 flex items-center justify-center p-3 sm:p-4">
-      {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
@@ -32,7 +31,6 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
 
       <Card className="relative max-w-lg w-full bg-slate-900/90 border-slate-700 backdrop-blur">
         <CardContent className="pt-6 pb-6 sm:pt-8 sm:pb-8 px-4 sm:px-6">
-          {/* Logo */}
           <div className="flex justify-center mb-4 sm:mb-6">
             <img 
               src="/SwipeUp-AI-Quest/swipeup-logo.jpeg" 
@@ -41,7 +39,6 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
             />
           </div>
 
-          {/* Title */}
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
               SwipeUp AI Quest
@@ -55,7 +52,6 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
             </p>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
             <div className="text-center p-2 sm:p-3 bg-slate-800/50 rounded-lg">
               <p className="text-xl sm:text-2xl font-bold text-teal-400">6</p>
@@ -71,7 +67,6 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
             </div>
           </div>
 
-          {/* Name input */}
           <div className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-xs sm:text-sm text-slate-400 mb-2">
@@ -96,7 +91,6 @@ function WelcomeScreen({ onStart }: { onStart: (name: string) => void }) {
             </Button>
           </div>
 
-          {/* Features */}
           <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-700">
             <p className="text-xs text-slate-500 text-center mb-3 sm:mb-4">What you'll learn:</p>
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
@@ -149,7 +143,6 @@ function MissionSelectScreen({
       />
       
       <main className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-        {/* Welcome section */}
         <div className="text-center mb-4 sm:mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
             Welcome back, {playerName}!
@@ -162,7 +155,6 @@ function MissionSelectScreen({
           </p>
         </div>
 
-        {/* Certificate if complete */}
         {isComplete && completedAt && (
           <div className="mb-6 sm:mb-8">
             <Certificate 
@@ -173,7 +165,6 @@ function MissionSelectScreen({
           </div>
         )}
 
-        {/* Progress overview */}
         <Card className="bg-slate-900/80 border-slate-700 mb-4 sm:mb-8">
           <CardContent className="pt-4 sm:pt-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-4">
@@ -188,7 +179,6 @@ function MissionSelectScreen({
           </CardContent>
         </Card>
 
-        {/* Mission grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           {missions.map((mission) => (
             <MissionCard
@@ -212,11 +202,13 @@ function MissionScreen({
   currentSection,
   onCompleteSection,
   onPreviousSection,
+  onExitMission,
 }: {
   mission: typeof missions[0];
   currentSection: number;
   onCompleteSection: () => void;
   onPreviousSection: () => void;
+  onExitMission: () => void;
 }) {
   const section = mission.sections[currentSection];
 
@@ -230,6 +222,8 @@ function MissionScreen({
         playerName="" 
         xp={0} 
         missionsCompleted={0}
+        showBackButton={true}
+        onBackToMissions={onExitMission}
       />
       
       <main className="px-4 py-8">
@@ -253,6 +247,7 @@ function QuizScreen({
   showFeedback,
   onAnswer,
   onNext,
+  onExitMission,
 }: {
   mission: typeof missions[0];
   activeQuestion: number;
@@ -260,6 +255,7 @@ function QuizScreen({
   showFeedback: boolean;
   onAnswer: (answer: string | number) => void;
   onNext: () => void;
+  onExitMission: () => void;
 }) {
   const question = mission.quiz[activeQuestion];
   const selectedAnswer = quizAnswers[question.id];
@@ -271,6 +267,8 @@ function QuizScreen({
         playerName="" 
         xp={0} 
         missionsCompleted={0}
+        showBackButton={true}
+        onBackToMissions={onExitMission}
       />
       
       <main className="px-4 py-8">
@@ -357,22 +355,18 @@ export default function Home() {
 
   const { progress, currentView, activeMission, activeQuizQuestion, quizAnswers, showFeedback } = state;
 
-  // Scroll to top whenever view changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [currentView]);
 
-  // Scroll to top when section changes within a mission
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [progress.currentSection]);
 
-  // Scroll to top when quiz question changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeQuizQuestion]);
 
-  // Handle mission selection
   const handleSelectMission = (missionId: number) => {
     const mission = missions.find(m => m.id === missionId);
     if (mission) {
@@ -380,14 +374,12 @@ export default function Home() {
     }
   };
 
-  // Handle retry
   const handleRetry = () => {
     if (activeMission) {
       selectMission(activeMission);
     }
   };
 
-  // Render based on current view
   switch (currentView) {
     case 'welcome':
       return <WelcomeScreen onStart={startGame} />;
@@ -414,6 +406,7 @@ export default function Home() {
           currentSection={progress.currentSection}
           onCompleteSection={completeSection}
           onPreviousSection={previousSection}
+          onExitMission={returnToMap}
         />
       );
 
@@ -427,6 +420,7 @@ export default function Home() {
           showFeedback={showFeedback}
           onAnswer={(answer) => answerQuiz(activeMission.quiz[activeQuizQuestion].id, answer)}
           onNext={nextQuestion}
+          onExitMission={returnToMap}
         />
       );
 
