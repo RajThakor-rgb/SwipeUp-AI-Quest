@@ -151,7 +151,7 @@ export function MissionCard({
   );
 }
 
-// Mind Map View Component - Visual Cheat Sheet
+// Interactive Mind Map Component - Visual Learning Tool
 function MindMapView({ 
   section 
 }: { 
@@ -163,9 +163,21 @@ function MindMapView({
     example?: string;
   };
 }) {
-  const extractMindMapContent = (content: string, keyPoints?: string[]) => {
-    const branches: { title: string; items: string[] }[] = [];
-    
+  const [activeCard, setActiveCard] = useState<number | null>(null);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [quizAnswer, setQuizAnswer] = useState<string | null>(null);
+
+  // Extract and transform content into visual concepts
+  const extractConcepts = (content: string, keyPoints?: string[]) => {
+    const concepts: { 
+      icon: string; 
+      title: string; 
+      quickRef: string; 
+      details: string[];
+      tip?: string;
+    }[] = [];
+
+    // Parse the content to extract meaningful concepts
     const paragraphs = content.split('\n\n');
     
     paragraphs.forEach(para => {
@@ -183,10 +195,33 @@ function MindMapView({
         });
         
         if (items.length > 0) {
-          branches.push({ title, items });
+          // Create a quick reference summary (first 6 words of first item)
+          const quickRef = items[0].split(' ').slice(0, 6).join(' ') + (items[0].split(' ').length > 6 ? '...' : '');
+          
+          // Assign icon based on keywords
+          let icon = '📌';
+          const titleLower = title.toLowerCase();
+          if (titleLower.includes('what is') || titleLower.includes('definition')) icon = '🎯';
+          else if (titleLower.includes('how') || titleLower.includes('work')) icon = '⚙️';
+          else if (titleLower.includes('why') || titleLower.includes('benefit')) icon = '💡';
+          else if (titleLower.includes('type') || titleLower.includes('kind')) icon = '📋';
+          else if (titleLower.includes('example') || titleLower.includes('case')) icon = '🔬';
+          else if (titleLower.includes('use') || titleLower.includes('apply')) icon = '🛠️';
+          else if (titleLower.includes('important') || titleLower.includes('key')) icon = '🔑';
+          else if (titleLower.includes('tip') || titleLower.includes('remember')) icon = '💭';
+          else if (titleLower.includes('step') || titleLower.includes('process')) icon = '📊';
+          
+          concepts.push({
+            icon,
+            title,
+            quickRef,
+            details: items,
+            tip: items.length > 3 ? `Remember: ${items[0].substring(0, 50)}...` : undefined
+          });
         }
       }
       
+      // Handle bullet lists without headers
       if ((para.includes('\n- ') || para.includes('\n* ')) && !para.includes('**')) {
         const lines = para.split('\n');
         const items = lines
@@ -194,111 +229,227 @@ function MindMapView({
           .map(l => l.replace(/^[-*] /, '').replace(/\*\*(.+?)\*\*/g, '$1'));
         
         if (items.length > 0) {
-          branches.push({ title: 'Key Points', items });
+          concepts.push({
+            icon: '✨',
+            title: 'Key Points',
+            quickRef: items[0].split(' ').slice(0, 6).join(' ') + '...',
+            details: items
+          });
         }
       }
     });
     
+    // Add key takeaways if available
     if (keyPoints && keyPoints.length > 0) {
-      branches.push({ title: 'Key Takeaways', items: keyPoints });
+      concepts.push({
+        icon: '🏆',
+        title: 'Remember This',
+        quickRef: keyPoints[0].split(' ').slice(0, 6).join(' ') + '...',
+        details: keyPoints,
+        tip: 'These are the most important points!'
+      });
     }
     
-    return branches;
+    return concepts;
   };
 
-  const branches = extractMindMapContent(section.content, section.keyPoints);
+  const concepts = extractConcepts(section.content, section.keyPoints);
   
-  const branchColors = [
-    { primary: '#14b8a6', secondary: '#0d9488', light: 'rgba(20, 184, 166, 0.15)' },
-    { primary: '#8b5cf6', secondary: '#7c3aed', light: 'rgba(139, 92, 246, 0.15)' },
-    { primary: '#f59e0b', secondary: '#d97706', light: 'rgba(245, 158, 11, 0.15)' },
-    { primary: '#10b981', secondary: '#059669', light: 'rgba(16, 185, 129, 0.15)' },
-    { primary: '#3b82f6', secondary: '#2563eb', light: 'rgba(59, 130, 246, 0.15)' },
-    { primary: '#ec4899', secondary: '#db2777', light: 'rgba(236, 72, 153, 0.15)' },
+  // Color schemes
+  const colors = [
+    { gradient: 'from-teal-500 to-cyan-500', bg: 'bg-teal-500/10', border: 'border-teal-500', text: 'text-teal-400' },
+    { gradient: 'from-purple-500 to-pink-500', bg: 'bg-purple-500/10', border: 'border-purple-500', text: 'text-purple-400' },
+    { gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/10', border: 'border-amber-500', text: 'text-amber-400' },
+    { gradient: 'from-green-500 to-emerald-500', bg: 'bg-green-500/10', border: 'border-green-500', text: 'text-green-400' },
+    { gradient: 'from-blue-500 to-indigo-500', bg: 'bg-blue-500/10', border: 'border-blue-500', text: 'text-blue-400' },
+    { gradient: 'from-rose-500 to-pink-500', bg: 'bg-rose-500/10', border: 'border-rose-500', text: 'text-rose-400' },
   ];
 
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="min-w-[700px] py-6">
-        {/* Central Topic */}
-        <div className="flex justify-center mb-8">
-          <div 
-            className="relative px-8 py-4 rounded-2xl shadow-xl text-center"
-            style={{ 
-              background: 'linear-gradient(135deg, #14b8a6, #0891b2)',
-              boxShadow: '0 10px 40px rgba(20, 184, 166, 0.3)'
-            }}
-          >
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center text-xs">
+    <div className="w-full py-4">
+      {/* Interactive Header */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full border border-teal-500/30">
+          <span className="text-xl">🗺️</span>
+          <span className="text-sm font-medium text-teal-400">Quick Visual Guide</span>
+        </div>
+        <p className="text-xs text-slate-500 mt-2">👆 Click on each card to explore details</p>
+      </div>
+
+      {/* Central Topic with Animation */}
+      <div className="flex justify-center mb-8">
+        <div className="relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+          <div className="relative px-8 py-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl shadow-xl text-center">
+            <div className="absolute -top-3 -left-3 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-lg animate-bounce shadow-lg">
               💡
             </div>
-            <h3 className="text-lg font-bold text-white max-w-[200px]">{section.title}</h3>
+            <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-slate-900 rounded-full text-xs text-slate-400 border border-slate-700">
+              {concepts.length} concepts
+            </div>
+            <h3 className="text-lg font-bold text-white max-w-[250px]">{section.title}</h3>
           </div>
         </div>
+      </div>
 
-        {/* Mind Map Branches */}
-        <div className="flex flex-wrap justify-center gap-6">
-          {branches.map((branch, i) => {
-            const color = branchColors[i % branchColors.length];
-            return (
-              <div key={i} className="flex flex-col items-center" style={{ maxWidth: '280px' }}>
-                <div 
-                  className="px-5 py-2.5 rounded-xl shadow-lg mb-4 text-center"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${color.primary}, ${color.secondary})`,
-                    boxShadow: `0 4px 20px ${color.light}`
-                  }}
-                >
-                  <h4 className="text-sm font-bold text-white whitespace-nowrap">{branch.title}</h4>
-                </div>
-                
-                <div className="flex flex-col items-center mb-3">
-                  <div 
-                    className="w-0.5 h-4"
-                    style={{ backgroundColor: color.primary }}
-                  />
-                </div>
-                
-                <div className="flex flex-col gap-2 w-full">
-                  {branch.items.map((item, j) => (
-                    <div 
-                      key={j}
-                      className="relative px-4 py-2 rounded-lg text-sm text-slate-200 border-l-4"
-                      style={{ 
-                        backgroundColor: color.light,
-                        borderLeftColor: color.primary
-                      }}
-                    >
-                      <span className="flex items-start gap-2">
-                        <span 
-                          className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
-                          style={{ backgroundColor: color.primary }}
-                        />
-                        <span>{item}</span>
-                      </span>
-                    </div>
-                  ))}
+      {/* Interactive Concept Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {concepts.map((concept, i) => {
+          const color = colors[i % colors.length];
+          const isActive = activeCard === i;
+          
+          return (
+            <div 
+              key={i}
+              onClick={() => setActiveCard(isActive ? null : i)}
+              className={cn(
+                'relative rounded-xl cursor-pointer transition-all duration-300 overflow-hidden',
+                isActive ? 'ring-2 ring-teal-500 scale-[1.02]' : 'hover:scale-[1.01]'
+              )}
+            >
+              {/* Card Header */}
+              <div className={cn(
+                'px-4 py-3 flex items-center gap-3',
+                `bg-gradient-to-r ${color.gradient}`
+              )}>
+                <span className="text-2xl">{concept.icon}</span>
+                <h4 className="text-sm font-bold text-white flex-1">{concept.title}</h4>
+                <div className={cn(
+                  'w-6 h-6 rounded-full flex items-center justify-center transition-transform',
+                  isActive ? 'rotate-180 bg-white/20' : 'bg-white/10'
+                )}>
+                  <span className="text-white text-xs">{isActive ? '▲' : '▼'}</span>
                 </div>
               </div>
-            );
-          })}
-        </div>
+              
+              {/* Card Content */}
+              <div className={cn(
+                'p-4 border-x border-b transition-all duration-300',
+                color.bg,
+                color.border,
+                isActive ? 'max-h-[500px] opacity-100' : 'max-h-[60px] opacity-70'
+              )}>
+                {/* Quick Reference (always visible) */}
+                <div className={cn(
+                  'text-sm text-slate-300 mb-2',
+                  isActive ? 'font-medium' : 'line-clamp-2'
+                )}>
+                  {isActive ? '📖 Details:' : concept.quickRef}
+                </div>
+                
+                {/* Expanded Details */}
+                {isActive && (
+                  <div className="space-y-2 animate-fade-in">
+                    {concept.details.map((detail, j) => (
+                      <div 
+                        key={j}
+                        className="flex items-start gap-2 text-sm text-slate-200 p-2 rounded-lg bg-slate-800/50"
+                      >
+                        <span className={cn('mt-0.5', color.text)}>•</span>
+                        <span>{detail}</span>
+                      </div>
+                    ))}
+                    
+                    {concept.tip && (
+                      <div className="mt-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                        <p className="text-xs text-amber-400">💡 {concept.tip}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-        {section.example && (
-          <div className="mt-8 flex justify-center">
-            <div 
-              className="p-4 rounded-xl max-w-md text-center"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1))',
-                border: '1px solid rgba(245, 158, 11, 0.3)'
-              }}
-            >
-              <h4 className="text-sm font-semibold text-amber-400 mb-2">💡 Practical Example</h4>
+      {/* Real-World Example */}
+      {section.example && (
+        <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-500/30">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">💡</span>
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-amber-400 mb-1">Real-World Example</h4>
               <p className="text-sm text-slate-200">{section.example}</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Quick Self-Check */}
+      <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-500/10 border border-blue-500/30">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🧠</span>
+            <h4 className="text-sm font-bold text-blue-400">Quick Self-Check</h4>
+          </div>
+          <button
+            onClick={() => setShowQuiz(!showQuiz)}
+            className="text-xs px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+          >
+            {showQuiz ? 'Hide' : 'Test Yourself'}
+          </button>
+        </div>
+        
+        {showQuiz && (
+          <div className="space-y-3 animate-fade-in">
+            <p className="text-sm text-slate-300">
+              Can you explain <strong className="text-white">{section.title}</strong> in your own words?
+            </p>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setQuizAnswer('got-it')}
+                className={cn(
+                  'p-3 rounded-lg text-sm transition-all',
+                  quizAnswer === 'got-it' 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                )}
+              >
+                ✅ Got it!
+              </button>
+              <button
+                onClick={() => setQuizAnswer('review')}
+                className={cn(
+                  'p-3 rounded-lg text-sm transition-all',
+                  quizAnswer === 'review' 
+                    ? 'bg-amber-500 text-white' 
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                )}
+              >
+                📖 Need Review
+              </button>
+            </div>
+            
+            {quizAnswer && (
+              <div className={cn(
+                'p-3 rounded-lg text-sm animate-fade-in',
+                quizAnswer === 'got-it' 
+                  ? 'bg-green-500/10 text-green-400 border border-green-500/30' 
+                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+              )}>
+                {quizAnswer === 'got-it' 
+                  ? '🎉 Great job! You understand this concept!' 
+                  : '💪 No worries! Go back to reading mode to review.'}
+              </div>
+            )}
+          </div>
         )}
       </div>
+
+      {/* CSS Animation */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
