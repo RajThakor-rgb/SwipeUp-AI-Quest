@@ -109,7 +109,14 @@ export function useGameState() {
       };
       saveProgress(newProgress);
 
-        const previousSection = useCallback(() => {
+      return {
+        ...prev,
+        progress: newProgress,
+      };
+    });
+  }, [saveProgress]);
+
+  const previousSection = useCallback(() => {
     setState(prev => {
       if (!prev.activeMission) return prev;
       
@@ -121,12 +128,6 @@ export function useGameState() {
       };
       saveProgress(newProgress);
 
-      return {
-        ...prev,
-        progress: newProgress,
-      };
-    });
-  }, [saveProgress]);
       return {
         ...prev,
         progress: newProgress,
@@ -244,7 +245,7 @@ export function useGameState() {
   }, [state.activeMission, state.quizAnswers]);
 
   const getCurrentScore = useCallback((): { correct: number; total: number; percentage: number } => {
-    if (!state.activeMission) return { correct: 0, total: 0, percentage: 0 };
+    if (!state.activeMission) return { correct: 0; total: 0; percentage: 0 };
     
     let correct = 0;
     const total = state.activeMission.quiz.length;
