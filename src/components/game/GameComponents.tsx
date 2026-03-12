@@ -151,7 +151,7 @@ export function MissionCard({
   );
 }
 
-// Interactive Mind Map Component - Visual Learning Tool
+// Mind Map Component - Visual Learning Tool with Branches
 function MindMapView({ 
   section 
 }: { 
@@ -163,293 +163,186 @@ function MindMapView({
     example?: string;
   };
 }) {
-  const [activeCard, setActiveCard] = useState<number | null>(null);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [quizAnswer, setQuizAnswer] = useState<string | null>(null);
+  // Extract content into mind map structure
+  const extractMindMapData = (content: string, keyPoints?: string[]) => {
+    const branches: { title: string; points: string[] }[] = [];
 
-  // Extract and transform content into visual concepts
-  const extractConcepts = (content: string, keyPoints?: string[]) => {
-    const concepts: { 
-      icon: string; 
-      title: string; 
-      quickRef: string; 
-      details: string[];
-      tip?: string;
-    }[] = [];
-
-    // Parse the content to extract meaningful concepts
     const paragraphs = content.split('\n\n');
     
     paragraphs.forEach(para => {
       const headerMatch = para.match(/\*\*(.+?):\*\*/);
       if (headerMatch) {
         const title = headerMatch[1];
-        const items: string[] = [];
+        const points: string[] = [];
         
         const lines = para.split('\n');
         lines.forEach(line => {
           const bulletMatch = line.match(/^[-*] (.+)/);
           if (bulletMatch) {
-            items.push(bulletMatch[1].replace(/\*\*(.+?)\*\*/g, '$1'));
+            points.push(bulletMatch[1].replace(/\*\*(.+?)\*\*/g, '$1'));
           }
         });
         
-        if (items.length > 0) {
-          // Create a quick reference summary (first 6 words of first item)
-          const quickRef = items[0].split(' ').slice(0, 6).join(' ') + (items[0].split(' ').length > 6 ? '...' : '');
-          
-          // Assign icon based on keywords
-          let icon = '📌';
-          const titleLower = title.toLowerCase();
-          if (titleLower.includes('what is') || titleLower.includes('definition')) icon = '🎯';
-          else if (titleLower.includes('how') || titleLower.includes('work')) icon = '⚙️';
-          else if (titleLower.includes('why') || titleLower.includes('benefit')) icon = '💡';
-          else if (titleLower.includes('type') || titleLower.includes('kind')) icon = '📋';
-          else if (titleLower.includes('example') || titleLower.includes('case')) icon = '🔬';
-          else if (titleLower.includes('use') || titleLower.includes('apply')) icon = '🛠️';
-          else if (titleLower.includes('important') || titleLower.includes('key')) icon = '🔑';
-          else if (titleLower.includes('tip') || titleLower.includes('remember')) icon = '💭';
-          else if (titleLower.includes('step') || titleLower.includes('process')) icon = '📊';
-          
-          concepts.push({
-            icon,
-            title,
-            quickRef,
-            details: items,
-            tip: items.length > 3 ? `Remember: ${items[0].substring(0, 50)}...` : undefined
-          });
+        if (points.length > 0) {
+          branches.push({ title, points });
         }
       }
       
-      // Handle bullet lists without headers
       if ((para.includes('\n- ') || para.includes('\n* ')) && !para.includes('**')) {
         const lines = para.split('\n');
-        const items = lines
+        const points = lines
           .filter(l => l.startsWith('- ') || l.startsWith('* '))
           .map(l => l.replace(/^[-*] /, '').replace(/\*\*(.+?)\*\*/g, '$1'));
         
-        if (items.length > 0) {
-          concepts.push({
-            icon: '✨',
-            title: 'Key Points',
-            quickRef: items[0].split(' ').slice(0, 6).join(' ') + '...',
-            details: items
-          });
+        if (points.length > 0) {
+          branches.push({ title: 'Key Points', points });
         }
       }
     });
     
-    // Add key takeaways if available
     if (keyPoints && keyPoints.length > 0) {
-      concepts.push({
-        icon: '🏆',
-        title: 'Remember This',
-        quickRef: keyPoints[0].split(' ').slice(0, 6).join(' ') + '...',
-        details: keyPoints,
-        tip: 'These are the most important points!'
-      });
+      branches.push({ title: 'Remember This', points: keyPoints });
     }
     
-    return concepts;
+    return branches;
   };
 
-  const concepts = extractConcepts(section.content, section.keyPoints);
+  const branches = extractMindMapData(section.content, section.keyPoints);
   
-  // Color schemes
-  const colors = [
-    { gradient: 'from-teal-500 to-cyan-500', bg: 'bg-teal-500/10', border: 'border-teal-500', text: 'text-teal-400' },
-    { gradient: 'from-purple-500 to-pink-500', bg: 'bg-purple-500/10', border: 'border-purple-500', text: 'text-purple-400' },
-    { gradient: 'from-amber-500 to-orange-500', bg: 'bg-amber-500/10', border: 'border-amber-500', text: 'text-amber-400' },
-    { gradient: 'from-green-500 to-emerald-500', bg: 'bg-green-500/10', border: 'border-green-500', text: 'text-green-400' },
-    { gradient: 'from-blue-500 to-indigo-500', bg: 'bg-blue-500/10', border: 'border-blue-500', text: 'text-blue-400' },
-    { gradient: 'from-rose-500 to-pink-500', bg: 'bg-rose-500/10', border: 'border-rose-500', text: 'text-rose-400' },
+  const branchColors = [
+    { primary: '#14b8a6', light: 'rgba(20, 184, 166, 0.15)', icon: '🎯' },
+    { primary: '#a855f7', light: 'rgba(168, 85, 247, 0.15)', icon: '⚙️' },
+    { primary: '#f59e0b', light: 'rgba(245, 158, 11, 0.15)', icon: '💡' },
+    { primary: '#10b981', light: 'rgba(16, 185, 129, 0.15)', icon: '📋' },
+    { primary: '#3b82f6', light: 'rgba(59, 130, 246, 0.15)', icon: '🔬' },
+    { primary: '#ec4899', light: 'rgba(236, 72, 153, 0.15)', icon: '🔑' },
   ];
 
   return (
-    <div className="w-full py-4">
-      {/* Interactive Header */}
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full border border-teal-500/30">
-          <span className="text-xl">🗺️</span>
-          <span className="text-sm font-medium text-teal-400">Quick Visual Guide</span>
-        </div>
-        <p className="text-xs text-slate-500 mt-2">👆 Click on each card to explore details</p>
-      </div>
-
-      {/* Central Topic with Animation */}
-      <div className="flex justify-center mb-8">
-        <div className="relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
-          <div className="relative px-8 py-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl shadow-xl text-center">
-            <div className="absolute -top-3 -left-3 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-lg animate-bounce shadow-lg">
-              💡
-            </div>
-            <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-slate-900 rounded-full text-xs text-slate-400 border border-slate-700">
-              {concepts.length} concepts
-            </div>
-            <h3 className="text-lg font-bold text-white max-w-[250px]">{section.title}</h3>
-          </div>
-        </div>
-      </div>
-
-      {/* Interactive Concept Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {concepts.map((concept, i) => {
-          const color = colors[i % colors.length];
-          const isActive = activeCard === i;
-          
-          return (
-            <div 
-              key={i}
-              onClick={() => setActiveCard(isActive ? null : i)}
-              className={cn(
-                'relative rounded-xl cursor-pointer transition-all duration-300 overflow-hidden',
-                isActive ? 'ring-2 ring-teal-500 scale-[1.02]' : 'hover:scale-[1.01]'
-              )}
-            >
-              {/* Card Header */}
-              <div className={cn(
-                'px-4 py-3 flex items-center gap-3',
-                `bg-gradient-to-r ${color.gradient}`
-              )}>
-                <span className="text-2xl">{concept.icon}</span>
-                <h4 className="text-sm font-bold text-white flex-1">{concept.title}</h4>
-                <div className={cn(
-                  'w-6 h-6 rounded-full flex items-center justify-center transition-transform',
-                  isActive ? 'rotate-180 bg-white/20' : 'bg-white/10'
-                )}>
-                  <span className="text-white text-xs">{isActive ? '▲' : '▼'}</span>
-                </div>
-              </div>
-              
-              {/* Card Content */}
-              <div className={cn(
-                'p-4 border-x border-b transition-all duration-300',
-                color.bg,
-                color.border,
-                isActive ? 'max-h-[500px] opacity-100' : 'max-h-[60px] opacity-70'
-              )}>
-                {/* Quick Reference (always visible) */}
-                <div className={cn(
-                  'text-sm text-slate-300 mb-2',
-                  isActive ? 'font-medium' : 'line-clamp-2'
-                )}>
-                  {isActive ? '📖 Details:' : concept.quickRef}
-                </div>
-                
-                {/* Expanded Details */}
-                {isActive && (
-                  <div className="space-y-2 animate-fade-in">
-                    {concept.details.map((detail, j) => (
-                      <div 
-                        key={j}
-                        className="flex items-start gap-2 text-sm text-slate-200 p-2 rounded-lg bg-slate-800/50"
-                      >
-                        <span className={cn('mt-0.5', color.text)}>•</span>
-                        <span>{detail}</span>
-                      </div>
-                    ))}
-                    
-                    {concept.tip && (
-                      <div className="mt-3 p-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                        <p className="text-xs text-amber-400">💡 {concept.tip}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Real-World Example */}
-      {section.example && (
-        <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-500/30">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-xl">💡</span>
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-amber-400 mb-1">Real-World Example</h4>
-              <p className="text-sm text-slate-200">{section.example}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Self-Check */}
-      <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-blue-500/10 border border-blue-500/30">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🧠</span>
-            <h4 className="text-sm font-bold text-blue-400">Quick Self-Check</h4>
-          </div>
-          <button
-            onClick={() => setShowQuiz(!showQuiz)}
-            className="text-xs px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
-          >
-            {showQuiz ? 'Hide' : 'Test Yourself'}
-          </button>
-        </div>
+    <div className="w-full py-6 overflow-x-auto">
+      <div className="min-w-[900px] flex flex-col items-center">
         
-        {showQuiz && (
-          <div className="space-y-3 animate-fade-in">
-            <p className="text-sm text-slate-300">
-              Can you explain <strong className="text-white">{section.title}</strong> in your own words?
-            </p>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setQuizAnswer('got-it')}
-                className={cn(
-                  'p-3 rounded-lg text-sm transition-all',
-                  quizAnswer === 'got-it' 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                )}
-              >
-                ✅ Got it!
-              </button>
-              <button
-                onClick={() => setQuizAnswer('review')}
-                className={cn(
-                  'p-3 rounded-lg text-sm transition-all',
-                  quizAnswer === 'review' 
-                    ? 'bg-amber-500 text-white' 
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                )}
-              >
-                📖 Need Review
-              </button>
+        {/* Central Topic Node */}
+        <div className="relative mb-2">
+          <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full blur-2xl opacity-40" />
+          <div 
+            className="relative px-10 py-5 rounded-full shadow-2xl text-center"
+            style={{ background: 'linear-gradient(135deg, #14b8a6, #0891b2)' }}
+          >
+            <div className="absolute -top-2 -left-2 w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-sm">💡</span>
             </div>
-            
-            {quizAnswer && (
-              <div className={cn(
-                'p-3 rounded-lg text-sm animate-fade-in',
-                quizAnswer === 'got-it' 
-                  ? 'bg-green-500/10 text-green-400 border border-green-500/30' 
-                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-              )}>
-                {quizAnswer === 'got-it' 
-                  ? '🎉 Great job! You understand this concept!' 
-                  : '💪 No worries! Go back to reading mode to review.'}
+            <h3 className="text-xl font-bold text-white whitespace-nowrap">{section.title}</h3>
+          </div>
+        </div>
+
+        {/* SVG Connecting Lines */}
+        <svg width="900" height="100" className="overflow-visible">
+          {branches.map((branch, i) => {
+            const totalBranches = branches.length;
+            const spacing = 800 / (totalBranches + 1);
+            const xEnd = 50 + spacing * (i + 1);
+            return (
+              <g key={i}>
+                <line
+                  x1="450"
+                  y1="0"
+                  x2={xEnd}
+                  y2="50"
+                  stroke={branchColors[i % branchColors.length].primary}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+                <circle
+                  cx={xEnd}
+                  cy="50"
+                  r="6"
+                  fill={branchColors[i % branchColors.length].primary}
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Branch Nodes Row */}
+        <div className="w-[900px] flex justify-between px-8 mb-3">
+          {branches.map((branch, i) => {
+            const color = branchColors[i % branchColors.length];
+            return (
+              <div key={i} className="flex flex-col items-center" style={{ width: `${100 / branches.length}%` }}>
+                <div 
+                  className="px-4 py-2 rounded-xl shadow-lg text-center"
+                  style={{ backgroundColor: color.primary }}
+                >
+                  <span className="mr-1">{color.icon}</span>
+                  <span className="text-sm font-bold text-white">{branch.title}</span>
+                </div>
               </div>
-            )}
+            );
+          })}
+        </div>
+
+        {/* Sub-branch Lines */}
+        <svg width="900" height="40" className="overflow-visible">
+          {branches.map((branch, i) => {
+            const totalBranches = branches.length;
+            const spacing = 800 / (totalBranches + 1);
+            const xPos = 50 + spacing * (i + 1);
+            const color = branchColors[i % branchColors.length];
+            
+            return (
+              <g key={i}>
+                <line
+                  x1={xPos}
+                  y1="0"
+                  x2={xPos}
+                  y2="30"
+                  stroke={color.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  opacity="0.5"
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Content Points - Each branch column */}
+        <div className="w-[900px] flex justify-between px-4">
+          {branches.map((branch, i) => {
+            const color = branchColors[i % branchColors.length];
+            return (
+              <div key={i} className="flex flex-col gap-2" style={{ width: `${100 / branches.length}%` }}>
+                {branch.points.map((point, j) => (
+                  <div 
+                    key={j}
+                    className="mx-1 px-3 py-2 rounded-lg text-xs text-slate-200 border-l-4"
+                    style={{ 
+                      backgroundColor: color.light,
+                      borderLeftColor: color.primary
+                    }}
+                  >
+                    • {point.length > 70 ? point.substring(0, 70) + '...' : point}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Example Section */}
+        {section.example && (
+          <div className="mt-8 p-4 rounded-xl max-w-lg text-center" style={{ background: 'linear-gradient(to right, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1))', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <span className="text-lg">💡</span>
+              <h4 className="text-sm font-bold text-amber-400">Real-World Example</h4>
+            </div>
+            <p className="text-sm text-slate-200">{section.example}</p>
           </div>
         )}
-      </div>
 
-      {/* CSS Animation */}
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out;
-        }
-      `}</style>
+      </div>
     </div>
   );
 }
