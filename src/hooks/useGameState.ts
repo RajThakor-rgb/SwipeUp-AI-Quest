@@ -66,15 +66,22 @@ export function useGameState() {
   }, [saveProgress]);
 
   const selectMission = useCallback((mission: Mission) => {
-    setState(prev => ({
-      ...prev,
-      currentView: 'mission',
-      activeMission: mission,
-      currentSection: 0,
-      activeQuizQuestion: 0,
-      quizAnswers: {},
-      showFeedback: false,
-    }));
+    setState(prev => {
+      const newProgress = {
+        ...prev.progress,
+        currentSection: 0,
+      };
+      return {
+        ...prev,
+        currentView: 'mission',
+        activeMission: mission,
+        currentSection: 0,
+        activeQuizQuestion: 0,
+        quizAnswers: {},
+        showFeedback: false,
+        progress: newProgress,
+      };
+    });
   }, []);
 
   const completeSection = useCallback(() => {
