@@ -14,24 +14,35 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  metadataBase: new URL("https://rajthakor-rgb.github.io/SwipeUp-AI-Quest/"),
+  title: "SwipeUp AI Quest - AI Literacy for Business Students",
+  description: "Master AI fundamentals, tools, ethics, and practical business applications through interactive missions designed for future business leaders.",
+  keywords: ["AI", "Artificial Intelligence", "Business Students", "Education", "SwipeUp", "AI Literacy", "Learning"],
+  authors: [{ name: "SwipeUp AI Society" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/SwipeUp-AI-Quest/swipeup-logo.jpeg",
+    apple: "/SwipeUp-AI-Quest/swipeup-logo.jpeg",
   },
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "SwipeUp AI Quest",
+    description: "AI Literacy for Business Students - Interactive learning missions",
+    url: "https://rajthakor-rgb.github.io/SwipeUp-AI-Quest/",
+    siteName: "SwipeUp AI Quest",
     type: "website",
+    images: [
+      {
+        url: "/SwipeUp-AI-Quest/swipeup-logo.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "SwipeUp AI Quest",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "SwipeUp AI Quest",
+    description: "AI Literacy for Business Students - Interactive learning missions",
+    images: ["/SwipeUp-AI-Quest/swipeup-logo.jpeg"],
   },
 };
 
