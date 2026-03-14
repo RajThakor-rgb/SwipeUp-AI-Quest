@@ -161,6 +161,7 @@ function MissionSelectScreen({
               playerName={playerName}
               xp={xp}
               completedAt={completedAt}
+              quizScores={quizScores}
             />
           </div>
         )}
