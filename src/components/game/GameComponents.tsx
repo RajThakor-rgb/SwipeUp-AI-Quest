@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mission, QuizQuestion, PlayerProgress } from '@/types/game';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { logToNotion } from '@/lib/notion';
 
 // XP Badge Component
 export function XPBadge({ xp, size = 'default' }: { xp: number; size?: 'sm' | 'default' | 'lg' }) {
@@ -782,16 +783,38 @@ export function Certificate({
   playerName,
   xp,
   completedAt,
+  quizScores,
 }: {
   playerName: string;
   xp: number;
   completedAt: string;
+  quizScores: Record<number, number>;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    logToNotion(playerName, xp, quizScores, completedAt);
+  }, [playerName, xp, quizScores, completedAt]);
+
   const date = new Date(completedAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
+
+  const namePart = playerName.slice(0, 4).toUpperCase();
+  const datePart = completedAt.slice(-4);
+  const accessCode = `SWIPEUP-${namePart}-${xp}-${datePart}`;
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(accessCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Silently fail
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4">
@@ -809,21 +832,21 @@ export function Certificate({
           </div>
 
           <div className="text-center mb-4 sm:mb-8">
-            <p className="text-teal-400 uppercase tracking-widest text-xs sm:text-sm mb-2">
+            <p className="text-teal-400 uppercase tracking-widest text-xs sm:text-sm mb-2 font-semibold">
               Certificate of Completion
             </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-white">
               SwipeUp AI Quest
             </h2>
-            <p className="text-slate-400 mt-1 text-sm sm:text-base">
+            <p className="text-slate-300 mt-1 text-sm sm:text-base">
               AI Literacy for Business Students
             </p>
           </div>
 
           <div className="text-center mb-4 sm:mb-8">
-            <p className="text-slate-400 text-xs sm:text-sm">This is to certify that</p>
+            <p className="text-slate-300 text-xs sm:text-sm">This is to certify that</p>
             <p className="text-xl sm:text-2xl font-bold text-teal-400 my-1 sm:my-2">{playerName}</p>
-            <p className="text-slate-400 text-xs sm:text-sm px-2">
+            <p className="text-slate-300 text-xs sm:text-sm px-2">
               has successfully completed all six missions of the
               <br />
               <span className="text-white font-semibold">SwipeUp AI Quest Program</span>
@@ -833,16 +856,16 @@ export function Certificate({
           <div className="flex justify-center gap-6 sm:gap-8 mb-4 sm:mb-8">
             <div className="text-center">
               <p className="text-2xl sm:text-3xl font-bold text-white">{xp.toLocaleString()}</p>
-              <p className="text-slate-400 text-xs sm:text-sm">Total XP</p>
+              <p className="text-slate-300 text-xs sm:text-sm">Total XP</p>
             </div>
             <div className="text-center">
               <p className="text-2xl sm:text-3xl font-bold text-white">6</p>
-              <p className="text-slate-400 text-xs sm:text-sm">Missions</p>
+              <p className="text-slate-300 text-xs sm:text-sm">Missions</p>
             </div>
           </div>
 
-          <div className="text-center border-t border-slate-700 pt-4 sm:pt-6">
-            <p className="text-slate-400 text-xs sm:text-sm">Completed on</p>
+          <div className="text-center border-t border-slate-600 pt-4 sm:pt-6">
+            <p className="text-slate-300 text-xs sm:text-sm">Completed on</p>
             <p className="text-white font-semibold text-sm sm:text-base">{date}</p>
           </div>
 
@@ -854,10 +877,40 @@ export function Certificate({
           </div>
         </CardContent>
       </Card>
+
+      <Card className="mt-6 bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/50">
+        <CardContent className="p-4 sm:p-6">
+          <div className="text-center">
+            <h3 className="text-lg sm:text-xl font-bold text-purple-300 mb-1">
+              🔑 Your Course 2 Access Code
+            </h3>
+            <p className="text-slate-400 text-xs sm:text-sm mb-4">
+              Enter this code on the SwipeUp AI Academy to unlock your next course
+            </p>
+            
+            <div className="bg-slate-900/80 rounded-lg p-4 mb-4 border border-slate-700">
+              <p className="font-mono text-xl sm:text-2xl md:text-3xl text-white tracking-wider break-all">
+                {accessCode}
+              </p>
+            </div>
+
+            <Button
+              onClick={copyToClipboard}
+              className={cn(
+                'px-6 py-2 font-semibold transition-all',
+                copied
+                  ? 'bg-green-500 hover:bg-green-500 text-white'
+                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white'
+              )}
+            >
+              {copied ? '✓ Copied!' : '📋 Copy Code'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
 // Header Component
 export function GameHeader({ 
   playerName, 
